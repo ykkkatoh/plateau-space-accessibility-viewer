@@ -1,0 +1,46 @@
+name: Monthly Repository Activity
+
+on:
+  schedule:
+    - cron: '23 3 1 * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update-counter:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Update keepalive counter
+        run: |
+          python - <<'PY'
+          import json
+          from datetime import datetime, timezone
+          from pathlib import Path
+
+          path = Path("keepalive.json")
+
+          if path.exists():
+              data = json.loads(path.read_text())
+          else:
+              data = {
+                  "note": "This file is updated automatically to keep the repository active.",
+                  "monthly_keepalive_count": 0
+              }
+
+          data["monthly_keepalive_count"] = data.get("monthly_keepalive_count", 0) + 1
+          data["last_updated"] = datetime.now(timezone.utc).isoformat()
+
+          path.write_text(json.dumps(data, indent=2, ensure_ascii=False) + "\n")
+          PY
+
+      - name: Commit and push changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add keepalive.json
+          git commit -m "Update monthly keepalive counter"
+          git push
