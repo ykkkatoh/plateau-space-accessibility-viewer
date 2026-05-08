@@ -141,9 +141,20 @@ def load_mappings() -> tuple[dict, dict]:
     root_map = dict(zip(cr["root"].str.strip(), cr["category"].str.strip()))
     return name_map, root_map
 
+@st.cache_data
+def get_available_bboxes() -> list[tuple]:
+    """dataフォルダにあるGeoJSONファイルのBBox一覧を返す"""
+    result = []
+    for f in sorted(BLDG_DIR.glob("*.geojson")):
+        s = f.stem
+        code = s[:9] if len(s) >= 9 and s[:9].isdigit() else s[:8]
+        bbox = mesh_to_bbox(code)
+        if bbox:
+            result.append(bbox)
+    return result
+
 def _interpolate_color(c1, c2, t):
     return tuple(int(c1[i] + (c2[i] - c1[i]) * t) for i in range(3))
-
 
 def alpha_to_hex(value: float, vmin: float, vmax: float, preset: str) -> str:
     if np.isnan(value) or np.isinf(value):
@@ -780,6 +791,18 @@ def detail_mode(gdf_luse, name_map, root_map):
                 bounds=[[bb[1], bb[0]], [bb[3], bb[2]]],
                 color="steelblue", fill=True, fill_opacity=0.15, tooltip=entry["id"],
             ).add_to(m)
+
+        for bb in get_available_bboxes():
+            folium.Rectangle(
+                bounds=[[bb[1], bb[0]], [bb[3], bb[2]]],
+                color="#3388ff",
+                weight=1,
+                fill=True,
+                fill_color="#3388ff",
+                fill_opacity=0.08,
+                tooltip="データあり",
+            ).add_to(m)
+        
         map_data = st_folium(m, width="100%", height=460, key="detail_map")
 
         click = map_data.get("last_clicked") if map_data else None
@@ -923,6 +946,18 @@ def main():
                 "rectangle": True, "polygon": False, "polyline": False,
                 "circle": False, "marker": False, "circlemarker": False,
             }).add_to(m)
+
+            for bb in get_available_bboxes():
+                folium.Rectangle(
+                    bounds=[[bb[1], bb[0]], [bb[3], bb[2]]],
+                    color="#3388ff",
+                    weight=1,
+                    fill=True,
+                    fill_color="#3388ff",
+                    fill_opacity=0.08,
+                    tooltip="データあり",
+                ).add_to(m)
+            
             map_data = st_folium(m, width="100%", height=600, key="compare_map")
 
         drawings = (map_data or {}).get("all_drawings", []) or []
