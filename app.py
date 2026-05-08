@@ -16,6 +16,7 @@ from streamlit_folium import st_folium
 from pyproj import Transformer
 import folium
 from folium.plugins import Draw
+from shapely.ops import unary_union
 
 # ── 定数 ──────────────────────────────────────────────────────────────────────
 EPSG_WGS84 = 4326
@@ -152,6 +153,14 @@ def get_available_bboxes() -> list[tuple]:
         if bbox:
             result.append(bbox)
     return result
+
+@st.cache_data
+def get_coverage_shape():
+    """全データBBoxをunionした外形ポリゴンを返す"""
+    boxes = [box(*bb) for bb in get_available_bboxes()]
+    if not boxes:
+        return None
+    return unary_union(boxes)
 
 def _interpolate_color(c1, c2, t):
     return tuple(int(c1[i] + (c2[i] - c1[i]) * t) for i in range(3))
@@ -792,15 +801,16 @@ def detail_mode(gdf_luse, name_map, root_map):
                 color="steelblue", fill=True, fill_opacity=0.15, tooltip=entry["id"],
             ).add_to(m)
 
-        for bb in get_available_bboxes():
-            folium.Rectangle(
-                bounds=[[bb[1], bb[0]], [bb[3], bb[2]]],
-                color="#3388ff",
-                weight=1,
-                fill=True,
-                fill_color="#3388ff",
-                fill_opacity=0.08,
-                tooltip="データあり",
+        shape = get_coverage_shape()
+        if shape:
+            folium.GeoJson(
+                shape.__geo_interface__,
+                style_function=lambda _: {
+                    "color": "#3388ff",
+                    "weight": 1.5,
+                    "fillColor": "#3388ff",
+                    "fillOpacity": 0.06,
+                },
             ).add_to(m)
         
         map_data = st_folium(m, width="100%", height=460, key="detail_map")
@@ -947,15 +957,16 @@ def main():
                 "circle": False, "marker": False, "circlemarker": False,
             }).add_to(m)
 
-            for bb in get_available_bboxes():
-                folium.Rectangle(
-                    bounds=[[bb[1], bb[0]], [bb[3], bb[2]]],
-                    color="#3388ff",
-                    weight=1,
-                    fill=True,
-                    fill_color="#3388ff",
-                    fill_opacity=0.08,
-                    tooltip="データあり",
+            shape = get_coverage_shape()
+            if shape:
+                folium.GeoJson(
+                    shape.__geo_interface__,
+                    style_function=lambda _: {
+                        "color": "#3388ff",
+                        "weight": 1.5,
+                        "fillColor": "#3388ff",
+                        "fillOpacity": 0.06,
+                    },
                 ).add_to(m)
             
             map_data = st_folium(m, width="100%", height=600, key="compare_map")
