@@ -156,11 +156,11 @@ def get_available_bboxes() -> list[tuple]:
 
 @st.cache_data
 def get_coverage_shape():
-    """全データBBoxをunionした外形ポリゴンを返す"""
     boxes = [box(*bb) for bb in get_available_bboxes()]
     if not boxes:
         return None
-    return unary_union(boxes)
+    merged = unary_union(boxes)
+    return merged.buffer(0.002).buffer(-0.001)
 
 def _interpolate_color(c1, c2, t):
     return tuple(int(c1[i] + (c2[i] - c1[i]) * t) for i in range(3))
@@ -811,6 +811,7 @@ def detail_mode(gdf_luse, name_map, root_map):
                     "fillColor": "#3388ff",
                     "fillOpacity": 0.06,
                 },
+            tooltip=folium.Tooltip("現在のデータはこの範囲をカバーしています", sticky=False),
             ).add_to(m)
         
         map_data = st_folium(m, width="100%", height=460, key="detail_map")
