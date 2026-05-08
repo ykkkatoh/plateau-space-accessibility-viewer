@@ -1,4 +1,4 @@
-name: Keep Awake
+name: Demo Availability Check
 
 on:
   schedule:
@@ -9,5 +9,9 @@ jobs:
   ping:
     runs-on: ubuntu-latest
     steps:
-      - name: Ping Streamlit App
-        run: curl -fL -sS https://plateau-space-accessibility-viewer.streamlit.app/ > /dev/null
+      - name: Check Streamlit App
+        run: |
+          curl -sS --max-time 30 \
+            -o /dev/null \
+            -w "HTTP %{http_code} URL %{url_effective}\n" \
+            https://plateau-space-accessibility-viewer.streamlit.app/
