@@ -1,5 +1,5 @@
 # plateau-space-accessibility-viewer
-![Demo Status](https://github.com/ykkatoh/plateau-space-accessibility-viewer/actions/workflows/keep_awake.yml/badge.svg)
+![Demo Status](https://github.com/ykKkatoh/plateau-space-accessibility-viewer/actions/workflows/keep_awake.yml/badge.svg)
 
 PLATEAUの3D都市モデルを用いて、任意のエリアの「観光向け／地域向け」の空間特性を可視化・定量比較するStreamlitアプリです。東京大学工学部精密工学科卒業研究の一環で開発しました。
 
