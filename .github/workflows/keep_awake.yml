@@ -10,4 +10,4 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Ping Streamlit App
-        run: curl -fL -sS https://~~.app/ > /dev/null
+        run: curl -fL -sS https://plateau-space-accessibility-viewer.streamlit.app/ > /dev/null
