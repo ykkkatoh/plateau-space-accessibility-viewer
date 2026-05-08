@@ -2,7 +2,7 @@
 PLATEAUの3D都市モデルを用いて、任意のエリアの「観光向け／地域向け」の空間特性を可視化・定量比較するStreamlitアプリです。
 
 🔗 **デモ**: [[Streamlit Cloud URL](https://plateau-space-accessibility-viewer.streamlit.app/)]
-![アプリイメージ](docs/demo.png)
+![アプリイメージ](demo.png)
 
 ## 概要
 観光客と地域住民では、同じ街であっても「実際に利用できる空間」が異なります。商業施設や公園は原則誰でも利用できますが、住宅地や農地は基本的に地域住民しか利用しません。
